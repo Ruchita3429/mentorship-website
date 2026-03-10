@@ -60,7 +60,7 @@ export default function DashboardPage() {
 
       <div className="grid gap-4 md:grid-cols-3">
         <Link
-          href="/students"
+          href="/student"
           className="rounded-xl border border-slate-800 bg-slate-900/70 p-4 transition hover:border-emerald-500/70 hover:bg-slate-900"
         >
           <h2 className="text-sm font-semibold text-slate-50">Students</h2>
@@ -70,7 +70,7 @@ export default function DashboardPage() {
         </Link>
 
         <Link
-          href="/lessons"
+          href="/lesson"
           className="rounded-xl border border-slate-800 bg-slate-900/70 p-4 transition hover:border-emerald-500/70 hover:bg-slate-900"
         >
           <h2 className="text-sm font-semibold text-slate-50">Lessons</h2>

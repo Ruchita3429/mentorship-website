@@ -1,36 +1,53 @@
-const OpenAI = require('openai');
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
-
 /**
- * Summarize text using OpenAI API
+ * Summarize text using Google Gemini API
  * @param {string} text - Text to summarize
  * @returns {Promise<string>} - Summary in 3-6 bullet points, under 120 words
  */
 const summarizeText = async (text) => {
   try {
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a helpful assistant that summarizes text into 3-6 concise bullet points. Keep the total summary under 120 words. Use bullet point format with • prefix.'
-        },
-        {
-          role: 'user',
-          content: `Please summarize the following text into 3-6 bullet points (under 120 words total):\n\n${text}`
-        }
-      ],
-      temperature: 0.5,
-      max_tokens: 300
-    });
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error('GEMINI_API_KEY is not set');
+    }
 
-    const summary = completion.choices[0].message.content.trim();
+    const response = await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + apiKey,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text:
+                    'You are a helpful assistant that summarizes text into 3-6 concise bullet points under 120 words total. ' +
+                    'Use bullet point format with • prefix.\n\nText to summarize:\n\n' +
+                    text
+                }
+              ]
+            }
+          ]
+        })
+      }
+    );
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      console.error('Gemini API HTTP error:', response.status, errorBody);
+      throw new Error('Failed to generate summary');
+    }
+
+    const data = await response.json();
+    const summary =
+      data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ||
+      'No summary generated.';
+
     return summary;
   } catch (error) {
-    console.error('OpenAI API Error:', error.message);
+    console.error('Gemini API Error:', error.message);
     throw new Error('Failed to generate summary');
   }
 };
